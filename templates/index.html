@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Watch Together - Synced</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      background: #f4f4f4; 
+      margin: 0;
+    }
+    h1 { 
+      background: #333; 
+      color: white; 
+      padding: 15px; 
+      margin: 0; 
+    }
+    #controls { 
+      margin: 20px; 
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input[type="text"], input[type="number"] { 
+      padding: 10px; 
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    #videoUrl {
+      width: 400px;
+    }
+    #seekTime {
+      width: 100px;
+    }
+    button { 
+      padding: 10px 20px; 
+      margin: 5px; 
+      background: #007bff; 
+      color: white; 
+      border: none; 
+      cursor: pointer; 
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button:hover { 
+      background: #0056b3; 
+    }
+    .seek-control {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+    #player { 
+      margin-top: 20px; 
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .status {
+      margin: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .status-item {
+      padding: 10px 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-size: 14px;
+      font-weight: bold;
+    }
+    #connectionStatus {
+      color: #007bff;
+    }
+    #userCount {
+      color: #28a745;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-icon {
+      font-size: 16px;
+    }
+    .connected {
+      background: #d4edda !important;
+      color: #155724 !important;
+    }
+    .disconnected {
+      background: #f8d7da !important;
+      color: #721c24 !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 Watch Together - Synced</h1>
+
+  <div id="controls">
+    <div>
+      <input type="text" id="videoUrl" placeholder="Paste YouTube URL here">
+      <button onclick="loadVideo()">Load Video</button>
+    </div>
+    
+    <div style="margin-top: 15px;">
+      <button onclick="controlVideo('play')">▶️ Play</button>
+      <button onclick="controlVideo('pause')">⏸️ Pause</button>
+      <button onclick="getCurrentTime()">🕐 Get Time</button>
+    </div>
+    
+    <div class="seek-control">
+      <input type="number" id="seekTime" placeholder="Seconds" min="0" step="0.1">
+      <button onclick="seekVideo()">🎯 Seek To Time</button>
+    </div>
+  </div>
+
+  <!-- Status section with BOTH connection status and user count -->
+  <div class="status">
+    <div id="connectionStatus" class="status-item">Connecting...</div>
+    <div id="userCount" class="status-item">
+      <span class="user-icon">👥</span>
+      <span id="userCountText">0 watching</span>
+    </div>
+  </div>
+
+  <div id="playerContainer">
+    <div id="player"></div>
+  </div>
+
+  <script src="/static/script.js"></script>
+  
+  <script>
+    // Update connection status
+    socket.on('connect', function() {
+      const status = document.getElementById('connectionStatus');
+      status.textContent = '✅ Connected & Ready to Sync!';
+      status.classList.add('connected');
+      status.classList.remove('disconnected');
+    });
+    
+    socket.on('disconnect', function() {
+      const status = document.getElementById('connectionStatus');
+      status.textContent = '❌ Connection Lost - Reconnecting...';
+      status.classList.add('disconnected');
+      status.classList.remove('connected');
+    });
+
+    // Handle user count updates
+    socket.on('userCount', function(data) {
+      console.log('User count received:', data);
+      const userCountText = document.getElementById('userCountText');
+      const count = data.count;
+      
+      // Update counter text with proper grammar
+      if (count === 0) {
+        userCountText.textContent = 'No one watching';
+      } else if (count === 1) {
+        userCountText.textContent = '1 person watching';
+      } else {
+        userCountText.textContent = `${count} people watching`;
+      }
+      
+      console.log(`Users online: ${count}`);
+    });
+  </script>
+</body>
+</html>
