@@ -2,8 +2,9 @@ services:
   - type: web
     name: watch-together
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --worker-class eventlet -w 1 app:app"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.8
+        value: 3.11
