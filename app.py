@@ -1,13 +1,10 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
-import eventlet
 import time
-
-eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret"
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 
 # Store current video state with timestamp
 current_video = {
